@@ -15,6 +15,7 @@ proRoute.get('/editproject',proController.editproject);
 proRoute.get('/professionalchatlist',proController.professionalchatlist);
 proRoute.get('/findchat',proController.findchat);
 proRoute.get('/proprofile',proController.proprofile);
+proRoute.get('/loadprobookings',proController.loadprobookings);
 
 proRoute.post('/register',proController.postregister);
 proRoute.post('/verification',proController.Verification);

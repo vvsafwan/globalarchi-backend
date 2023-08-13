@@ -9,7 +9,8 @@ const Basicinfo = require('../models/basicinfo');
 const BusDetails = require('../models/businessdetails');
 const ProjectDetails = require('../models/projectdetails');
 const Connection = require('../models/connection');     
-const Message = require('../models/message')        
+const Message = require('../models/message');  
+const Booking = require('../models/booking');      
 
 const sendMail = async(name,email,userid)=>{
     try {
@@ -653,6 +654,24 @@ const proprofile = async(req,res,next)=>{
     }
 }
 
+const loadprobookings = async(req,res,next)=>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const claims = jwt.verify(token,"prosecret")
+        if(!claims){
+            return res.status(401).send({
+                message:"unauthenticated"
+            })
+        }
+        const proid = claims._id;
+        const data = await Booking.find({professional:proid});
+        res.json(data);
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
 
 
 module.exports = {
@@ -679,5 +698,6 @@ module.exports = {
     professionalchatlist,
     findchat,
     message,
-    proprofile
+    proprofile,
+    loadprobookings
 }

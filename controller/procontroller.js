@@ -193,7 +193,7 @@ const sendreset = async(name,email,token)=>{
             from: 'vvsafwan2002@gmail.com',
             to: email,
             subject: 'For Reset Password',
-            html: '<p>Hi '+name+', click this link <a href="http://localhost:4200/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
+            html: '<p>Hi '+name+', click this link <a href="https://globalarchi.netlify.app/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
         }
         transporter.sendMail(mailOptions, function(error,info){
             if(error){

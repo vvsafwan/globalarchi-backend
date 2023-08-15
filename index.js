@@ -15,7 +15,7 @@ dotenv.config();
 
 app.use(cors({
     credentials:true,
-    origin:['http://localhost:4200']
+    origin:['https://globalarchi.netlify.app']
 }));
 
 app.use(cookieParser());

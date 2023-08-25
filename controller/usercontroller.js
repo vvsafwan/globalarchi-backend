@@ -13,11 +13,12 @@ const Connection = require('../models/connection');
 const Message = require('../models/message');
 const Booking = require('../models/booking');
 const Review = require('../models/reviewmodel')
+const Profileuser = require('../models/userprofileimg');
 
 const sendMail = async(name,email,userid)=>{
     try {
         let otp = '';
-        let digits = '0123456789';
+        const digits = '0123456789';
         for(let i=0;i<4;i++){
             otp+=digits[Math.floor(Math.random()*10)]
         }
@@ -60,14 +61,14 @@ const sendreset = async(name,email,token)=>{
             requireTLS: true,
             auth:{
                 user: 'vvsafwan2002@gmail.com',
-                pass: 'kikppwpowovdnpur'
+                pass: process.env.PASS
             }
         })
         const mailOptions = {
             from: 'vvsafwan2002@gmail.com',
             to: email,
             subject: 'For Reset Password',
-            html: '<p>Hi '+name+', click this link <a href="https://globalarchi.netlify.app/renewpassword/token='+token+'">Reset password</a> to reset your password'
+            html: '<p>Hi '+name+', click this link <a href="http://localhost:4200/renewpassword/token='+token+'">Reset password</a> to reset your password'
         }
         transporter.sendMail(mailOptions, function(error,info){
             if(error){
@@ -104,10 +105,10 @@ const Verification = async(req,res,next)=>{
 
 const postregister = async(req,res,next)=>{
     try {
-        let name = req.body.name;
-        let email = req.body.email;
-        let mobile = req.body.mobile;
-        let password = req.body.password;
+        const name = req.body.name;
+        const email = req.body.email;
+        const mobile = req.body.mobile;
+        const password = req.body.password;
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt);
@@ -142,7 +143,7 @@ const postregister = async(req,res,next)=>{
 
 const reverification = async(req,res,next)=>{
     try {
-        let email = req.body.email;
+        const email = req.body.email;
         const userdata = await User.findOne({email:email});
         sendMail(userdata.name,userdata.email,userdata._id);
         res.json(userdata);
@@ -482,8 +483,7 @@ const verifypayment = async(req,res,next)=>{
         const userid = claims._id;
         const proid = req.query.id
         const paymentId = req.body.razorpay_payment_id;
-        const status = req.body.status_code;
-        if(status==200){
+        if(paymentId){
             const data = await Booking.updateOne({professional:proid,user:userid},{$set:{paymentId:paymentId,status:true}});
             res.send({
                 message:"success"
@@ -530,7 +530,6 @@ const loadbookings = async(req,res,next)=>{
         }
         const userid = claims._id;
         const data = await Booking.find({user:userid}).populate("professional");
-        console.log(data);
         res.json(data);
     } catch (error) {
         next(error);
@@ -541,12 +540,9 @@ const loadbookings = async(req,res,next)=>{
 const savereview = async(req,res,next)=>{
     try {
         const proid = req.query.id;
-        console.log(req.body);
         const review = req.body.review;
-        // console.log(review);
         const rating = req.body.rating;
         const name = req.body.name;
-        console.log(rating);
         const add = new Review({
             proid:proid,
             name:name,
@@ -576,6 +572,90 @@ const loadreview = async(req,res,next)=>{
     }
 }
 
+const payagain = async(req,res,next)=>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const claims = jwt.verify(token,"secret")
+        if(!claims){
+            return res.status(401).send({
+                message:"unauthenticated"
+            })
+        }
+        const userid = claims._id;
+        const proid = req.query.id;
+        const data = await Booking.findOne({professional:proid,user:userid,status:false});
+        console.log(data);
+        if(data){
+            res.json(data)
+        }else{
+            res.status(404).send("Something went wrong");
+        }
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
+const updateuserprofile = async(req,res,next)=>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const claims = jwt.verify(token,"secret")
+        if(!claims){
+            return res.status(401).send({
+                message:"unauthenticated"
+            })
+        }
+        const userid = claims._id;
+        const image = req.file.filename;
+        const data = await Profileuser.findOne({userid:userid});
+        if(data){
+            const updatedata = await Profileuser.updateOne({userid:userid},{$set:{image:image}});
+            if(updatedata){
+                res.send({
+                    message:"success"
+                })
+            }else{
+                res.status(404);
+            }
+        }else{
+            const newimage = new Profileuser({
+                userid:userid,
+                image:image
+            })
+            const savedata = await newimage.save();
+            if(savedata){
+                res.send({
+                    message:"success"
+                })
+            }else{
+                res.status(404);
+            }
+        }
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
+const profileimg = async(req,res,next)=>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const claims = jwt.verify(token,"secret")
+        if(!claims){
+            return res.status(401).send({
+                message:"unauthenticated"
+            })
+        }
+        const userid = claims._id;
+        const data = await Profileuser.findOne({userid:userid});
+        console.log(data);
+        res.json(data)
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
 module.exports = {
     postregister,
     Verification,
@@ -599,5 +679,8 @@ module.exports = {
     profile,
     loadbookings,
     savereview,
-    loadreview
+    loadreview,
+    payagain,
+    updateuserprofile,
+    profileimg
 }

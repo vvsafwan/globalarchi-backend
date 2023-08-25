@@ -15,7 +15,7 @@ const Booking = require('../models/booking');
 const sendMail = async(name,email,userid)=>{
     try {
         let otp = '';
-        let digits = '0123456789';
+        const digits = '0123456789';
         for(let i=0;i<4;i++){
             otp+=digits[Math.floor(Math.random()*10)]
         }
@@ -72,10 +72,10 @@ const Verification = async(req,res,next)=>{
 
 const postregister = async(req,res,next)=>{
     try {
-        let name = req.body.name;
-        let email = req.body.email;
-        let mobile = req.body.mobile;
-        let password = req.body.password;
+        const name = req.body.name;
+        const email = req.body.email;
+        const mobile = req.body.mobile;
+        const password = req.body.password;
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt);
@@ -110,7 +110,7 @@ const postregister = async(req,res,next)=>{
 
 const reverification = async(req,res,next)=>{
     try {
-        let email = req.body.email;
+        const email = req.body.email;
         const userdata = await Pro.findOne({email:email});
         sendMail(userdata.name,userdata.email,userdata._id);
         res.json(userdata);
@@ -193,7 +193,7 @@ const sendreset = async(name,email,token)=>{
             from: 'vvsafwan2002@gmail.com',
             to: email,
             subject: 'For Reset Password',
-            html: '<p>Hi '+name+', click this link <a href="https://globalarchi.netlify.app/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
+            html: '<p>Hi '+name+', click this link <a href="http://localhost:4200/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
         }
         transporter.sendMail(mailOptions, function(error,info){
             if(error){
@@ -279,6 +279,7 @@ const addbasicinfo = async(req,res,next)=>{
             })
             const datasave = await basicinfo.save();
             if(datasave){
+                await Pro.updateOne({_id:userid},{$set:{image:image}})
                 res.send({
                     message:"success"
                 })

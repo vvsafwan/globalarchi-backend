@@ -1,5 +1,7 @@
 const express = require('express');
 const userRoute = express();
+const multer = require('multer');
+const upload = multer({dest:'./File'});
 
 const userController = require('../controller/usercontroller');
 
@@ -13,6 +15,7 @@ userRoute.get('/allmessages',userController.allmessages)
 userRoute.get('/profile',userController.profile)
 userRoute.get('/loadbookings',userController.loadbookings)
 userRoute.get('/loadreview',userController.loadreview)
+userRoute.get('/profileimg',userController.profileimg);
 
 userRoute.post('/register',userController.postregister);
 userRoute.post('/verification',userController.Verification);
@@ -27,5 +30,7 @@ userRoute.post('/message',userController.addmessage);
 userRoute.post('/booking',userController.savebooking);
 userRoute.post('/verifypayment',userController.verifypayment);
 userRoute.post('/savereview',userController.savereview);
+userRoute.post('/payagain',userController.payagain);
+userRoute.post('/updateuserprofile',upload.single('image'),userController.updateuserprofile);
 
 module.exports = userRoute;

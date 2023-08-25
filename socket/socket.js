@@ -4,7 +4,7 @@ function initializeSocket(server){
     const io = socketIO(server, {
         pingTimeout: 60000,
         cors:{
-            origin: "https://globalarchi.netlify.app"
+            origin: "http://localhost:4200"
         }
     });
 

@@ -10,7 +10,8 @@ const BusDetails = require('../models/businessdetails');
 const ProjectDetails = require('../models/projectdetails');
 const Connection = require('../models/connection');     
 const Message = require('../models/message');  
-const Booking = require('../models/booking');      
+const Booking = require('../models/booking');   
+const Profileuser = require('../models/userprofileimg')   
 
 const sendMail = async(name,email,userid)=>{
     try {
@@ -193,7 +194,7 @@ const sendreset = async(name,email,token)=>{
             from: 'vvsafwan2002@gmail.com',
             to: email,
             subject: 'For Reset Password',
-            html: '<p>Hi '+name+', click this link <a href="http://localhost:4200/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
+            html: '<p>Hi '+name+', click this link <a href="https://globalarchi.netlify.app/pro/renewpassword/token='+token+'">Reset password</a> to reset your password'
         }
         transporter.sendMail(mailOptions, function(error,info){
             if(error){
@@ -581,10 +582,8 @@ const professionalchatlist = async(req,res,next)=>{
                 message:"unauthenticated"
             })
         }
-        console.log(claims._id);
 
         const user = await Connection.find({"connections.professional":claims._id}).populate("connections.user");
-        console.log(user);
         res.json({data:user,id:claims._id});
     } catch (error) {
         next(error);
@@ -673,6 +672,36 @@ const loadprobookings = async(req,res,next)=>{
     }
 }
 
+const loaduserprofile = async(req,res,next)=>{
+    try {
+        const userid = req.query.id;
+        const data = await Profileuser.findOne({userid:userid});
+        console.log(data);
+        res.json(data)
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
+const loadmyimg = async(req,res,next)=>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const claims = jwt.verify(token,"prosecret")
+        if(!claims){
+            return res.status(401).send({
+                message:"unauthenticated"
+            })
+        }
+        const userid = claims._id;
+        const data = await Pro.findOne({_id:userid});
+        res.json(data)
+    } catch (error) {
+        next(error);
+        console.log(error.message);
+    }
+}
+
 
 
 module.exports = {
@@ -700,5 +729,7 @@ module.exports = {
     findchat,
     message,
     proprofile,
-    loadprobookings
+    loadprobookings,
+    loaduserprofile,
+    loadmyimg
 }

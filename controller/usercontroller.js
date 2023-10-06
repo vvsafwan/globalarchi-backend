@@ -68,7 +68,7 @@ const sendreset = async(name,email,token)=>{
             from: 'vvsafwan2002@gmail.com',
             to: email,
             subject: 'For Reset Password',
-            html: '<p>Hi '+name+', click this link <a href="http://localhost:4200/renewpassword/token='+token+'">Reset password</a> to reset your password'
+            html: '<p>Hi '+name+', click this link <a href="https://globalarchi.netlify.app/renewpassword/token='+token+'">Reset password</a> to reset your password'
         }
         transporter.sendMail(mailOptions, function(error,info){
             if(error){
@@ -611,6 +611,7 @@ const updateuserprofile = async(req,res,next)=>{
         if(data){
             const updatedata = await Profileuser.updateOne({userid:userid},{$set:{image:image}});
             if(updatedata){
+                await User.updateOne({_id:userid},{$set:{image:image}})
                 res.send({
                     message:"success"
                 })
@@ -624,6 +625,7 @@ const updateuserprofile = async(req,res,next)=>{
             })
             const savedata = await newimage.save();
             if(savedata){
+                await User.updateOne({_id:userid},{$set:{image:image}})
                 res.send({
                     message:"success"
                 })
